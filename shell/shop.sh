@@ -192,9 +192,9 @@ do
                 if [ $n -gt 0 ]
                 then  
                     echo -e "火腿 $n 包\t购买成功"
-                    echo -e "您购买了 $n 包火腿\t单价：1元\t总计：$(($n*10))元\t">>$1/购物记录.txt
-                    echo -e "`date`\t 商店卖出了 $n 包火腿\t单价：1元\t总计：$(($n*10))元">>$1/商店卖出记录.txt
-                    money=`expr $money + $n \* 1`
+                    echo -e "您购买了 $n 包火腿\t单价：10元\t总计：$(($n*10))元\t">>$1/购物记录.txt
+                    echo -e "`date`\t 商店卖出了 $n 包火腿\t单价：10元\t总计：$(($n*10))元">>$1/商店卖出记录.txt
+                    money=`expr $money + $n \* 10`
                     read -p "#按回车键返回#"
                 else
                     echo -e "输入错误，购买失败"
