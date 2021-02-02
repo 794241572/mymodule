@@ -25,11 +25,13 @@ for((;;))
 do
     clear
     echo "***************** 欢迎光临 *****************"
-    echo -e "\t\t买买买商店"
+    echo -e "\t买买买商店(满88减10)"
     echo -e "\t\t1.日用品类"
     echo -e "\t\t2.水果类"
     echo -e "\t\t3.食品类"
-    echo -e "\t\t4.退出用户"
+    echo -e "\t\t4.用户充值"
+    echo -e "\t\t5.余额查询"
+    echo -e "\t\t6.结账退出"
     echo "***************** 欢迎光临 *****************"
     echo
     read -p "输入序号进行相关操作:" n
@@ -213,52 +215,85 @@ do
             fi
         done
 
-    
-    #退出购物系统
+    #用户充值界面
     elif [ $n -eq 4 ]
+    then
+        read -p "请输入金额(元):"  chong
+        if [ $chong -gt 0 ] && [ ${#chong} -lt 6 ]
+        then
+            echo -e "充值成功"
+            yu=`awk -F "：" 'NR==6{print $2}' $1/.user/$2.txt `
+            now=$(($yu+$chong))
+            sed -i.xxx "6,6s/${yu}/${now}/" $1/.user/$2.txt
+            echo -e "您的余额为: ${now} 元"
+            read -p "#按回车键返回#"
+        else
+            echo -e "请正确输入序号"
+            read -p "#按回车键返回#"
+        fi
+
+    #余额查询界面
+    elif [ $n -eq 5 ]
+    then
+        yu=`awk -F "：" 'NR==6{print $2}' $1/.user/$2.txt `
+        echo -e "您的余额为: ${yu} 元"
+        read -p "#按回车键返回#"
+
+    #退出购物系统
+    elif [ $n -eq 6 ]
     then
         clear
 
         #判断用户是否购买商品
         if [ ! $money -eq 0 ]
         then
-            cat 购物记录.txt
-            echo "***************** 购物记录 *****************"
-            echo
-            echo
-            echo >>$1/购物记录.txt
-            echo >>$1/购物记录.txt
-            echo -e "本次您一共消费 $money 元">>$1/购物记录.txt
-            #用户满足促销活动条件"满88减10"
-            echo 
-            echo
-            echo "***************** 谢谢惠顾 *****************"
-            if [ $money -ge 88 ]
+            yu=`awk -F "：" 'NR==6{print $2}' $1/.user/$2.txt `
+            if [ $yu -ge $money ]
             then
-                echo -e "本次您一共消费 $money 元"
-                echo -e "满足新店大促销条件，实际付款 $(($money-10)) 元"
-                echo -e "满足新店大促销条件，实际付款 $(($money-10)) 元">>$1/购物记录.txt
-                echo "***************** 购物记录 *****************">>$1/购物记录.txt
-                echo -e "本次商店收到付款 $(($money-10)) 元">>$1/商店盈利记录.txt
-                echo -e "本店活动多多，期待您的下次光临"
+                cat 购物记录.txt
+                echo "***************** 购物记录 *****************"
+                echo
+                echo
+                echo >>$1/购物记录.txt
+                echo >>$1/购物记录.txt
+                #用户满足促销活动条件"满88减10"
+                echo 
+                echo
+                echo "***************** 谢谢惠顾 *****************"
+                if [ $money -ge 88 ]
+                then
+                    echo -e "本次您一共消费 $money 元"
+                    echo -e "满足新店大促销条件，实际付款 $(($money-10)) 元"
+                    money=$(($money-10))
+                    echo -e "满足新店大促销条件，实际付款 $(($money-10)) 元">>$1/购物记录.txt
+                    echo "***************** 购物记录 *****************">>$1/购物记录.txt
+                    echo -e "本次商店收到付款 $(($money-10)) 元">>$1/商店盈利记录.txt
+                    echo -e "本店活动多多，期待您的下次光临"
+                else
+                    echo -e "本次您一共消费 $money 元"
+                    echo -e "不满足新店大促销条件，实际付款 $money 元"
+                    echo -e "不满足新店大促销条件，实际付款 $money 元">>$1/购物记录.txt
+                    echo "***************** 购物记录 *****************">>$1/购物记录.txt
+                    echo -e "`date`\t本次商店收到付款 $money 元">>$1/商店盈利记录.txt 
+                fi
+                new=$(($yu-$money))
+                sed -i.xxx "6,6s/${yu}/${new}/" $1/.user/$2.txt
+                echo  -e "***************** 谢谢惠顾 *****************"
+                read -p "#按回车键退出用户#"
+                break
             else
-                echo -e "本次您一共消费 $money 元"
-                echo -e "不满足新店大促销条件，实际付款 $money 元"
-                echo -e "不满足新店大促销条件，实际付款 $money 元">>$1/购物记录.txt
-                echo "***************** 购物记录 *****************">>$1/购物记录.txt
-                echo -e "`date`\t本次商店收到付款 $money 元">>$1/商店盈利记录.txt 
+                echo -e "余额不足支付费用，请先充值支付再退出"
+                read -p "#按回车键返回#"
             fi
 
         else
-	    echo "***************** 谢谢惠顾 *****************"
+	        echo "***************** 谢谢惠顾 *****************"
             echo -e "您没有进行任何的消费"
             echo -e "本店活动多多，期待您的下次光临"
+            echo "***************** 谢谢惠顾 *****************"
+            read -p "#按回车键退出用户#"
+            break
         fi
-        echo "***************** 谢谢惠顾 *****************"
-        echo
-        read -p "#按回车键退出用户#"
-        break
-
 
     #非法输入
     else
@@ -279,24 +314,24 @@ clear
 pwd=`pwd`
 
 #检查用户信息存放目录
-test ! -e ${pwd}/user/
-if [ $? -ne 0 ]
+! test -e .user
+if [ $? -eq 0 ]
 then
-    mkdir user/
+    mkdir .user
 fi
 
 #会员操作界面
 for ((;;))
 do
     clear
-    echo "***************** 会员登录 *****************"
+    echo "***************** 主界面 *****************"
     echo -e "\t\t买买买商店"
     echo -e "\t\t1.会员登录"
     echo -e "\t\t2.会员注册"
     echo -e "\t\t3.修改密码"
     echo -e "\t\t4.密码找回"
     echo -e "\t\t5.退出"
-    echo "***************** 会员登录 *****************"
+    echo "***************** 主界面 *****************"
     echo
     read -p "输入序号进行相关操作:" n
 
@@ -306,17 +341,17 @@ do
         read -p "请输入您的手机号：" username
 
         #登录验证
-        test -e ${pwd}/user/${username}.txt
+        test -e ${pwd}/.user/${username}.txt
         if [ $? -eq 0 ]
         then
             read -p  "请输入您的会员密码：" -s  password
-            key=`awk -F "：" 'NR==5{print $2}' ${pwd}/user/${username}.txt `
+            key=`awk -F "：" 'NR==5{print $2}' ${pwd}/.user/${username}.txt `
             if [ $password == $key ]
             then
 		        clear
                 echo -e "\t\t正在登陆，请稍候。。。"
                 sleep 2s
-		        shop  ${pwd}
+		        shop  ${pwd}  ${username}
             else
                 clear
                 echo -e "输入密码错误！"
@@ -335,31 +370,34 @@ do
         then
 
             #验证手机号是否被注册
-            test -e ${pwd}/user/${username}.txt
+            test -e ${pwd}/.user/${username}.txt
             if [ $? -ne 0 ]
             then
                 read -p "请输入您的身份证号：" ID
                 if [ $ID -gt 0 ] && [ ${#ID} -eq 18 ]
                 then
                     clear
+                    #展示用户信息
                     echo "***************** 注册信息 *****************"
                     echo
                     echo -e "您注册的手机号为：$username"
                     echo -e "您的身份证号为：$ID"
                     echo -e "默认密码为：dev@easyops"
+                    echo -e "账户余额(元)：0"
                     echo -e 
                     echo "***************** 注册信息 *****************"
                     echo
                     read -p "#按回车键返回#"
 
                     #保存用户信息
-                    echo "***************** 用户信息 *****************">>${pwd}/user/${username}.txt
-                    echo                                              >>${pwd}/user/${username}.txt
-                    echo -e "手机号为：$username"                       >>${pwd}/user/${username}.txt
-                    echo -e "身份证号为：$ID"                           >>${pwd}/user/${username}.txt
-                    echo -e "密码为：dev@easyops"                      >>${pwd}/user/${username}.txt
-                    echo                                              >>${pwd}/user/${username}.txt
-                    echo "***************** 用户信息 *****************" >>${pwd}/user/${username}.txt
+                    echo "***************** 用户信息 *****************">>${pwd}/.user/${username}.txt
+                    echo                                              >>${pwd}/.user/${username}.txt
+                    echo -e "手机号为：$username"                       >>${pwd}/.user/${username}.txt
+                    echo -e "身份证号为：$ID"                           >>${pwd}/.user/${username}.txt
+                    echo -e "密码为：dev@easyops"                      >>${pwd}/.user/${username}.txt
+                    echo -e "账户余额(元)：0"                           >>${pwd}/.user/${username}.txt
+                    echo                                              >>${pwd}/.user/${username}.txt
+                    echo "***************** 用户信息 *****************" >>${pwd}/.user/${username}.txt
                 else
                     echo -e "身份证号格式错误！"
                     read -p "#按回车键返回#"
@@ -379,7 +417,7 @@ do
     elif [ $n -eq 3 ]
     then
         read -p "请输入您的手机号：" username
-        test -e ${pwd}/user/${username}.txt
+        test -e ${pwd}/.user/${username}.txt
         if [ $? -eq 0 ]
         then
 
@@ -387,7 +425,7 @@ do
             read -p "请输入您的身份证号：" ID
             if [ $ID -gt 0 ] && [ ${#ID} -eq 18 ]
             then
-                grep $ID <${pwd}/user/${username}.txt >>/dev/null
+                grep $ID <${pwd}/.user/${username}.txt >>/dev/null
                 if [ $? -eq 0 ]
                 then
                     clear
@@ -403,16 +441,18 @@ do
                             if [ $a = $b ]
                             then
                                 clear
+                                key=`awk -F "：" 'NR==5{print $2}' ${pwd}/.user/${username}.txt `
+                                sed -i.xxx "5,5s/${key}/${a}/" ${pwd}/.user/${username}.txt
                                 echo -e "修改密码成功"
-                                key=`awk -F "：" 'NR==5{print $2}' /Users/freeze/shell/user/${username}.txt `
                                 #保存用户信息
-                                echo "***************** 用户信息 *****************">${pwd}/user/${username}.txt
-                                echo                                              >>${pwd}/user/${username}.txt
-                                echo -e "手机号为：$username"                       >>${pwd}/user/${username}.txt
-                                echo -e "身份证号为：$ID"                           >>${pwd}/user/${username}.txt
-                                echo -e "密码为：$a"                               >>${pwd}/user/${username}.txt
-                                echo                                              >>${pwd}/user/${username}.txt
-                                echo "***************** 用户信息 *****************" >>${pwd}/user/${username}.txt
+                                # echo "***************** 用户信息 *****************">${pwd}/.user/${username}.txt
+                                # echo                                              >>${pwd}/.user/${username}.txt
+                                # echo -e "手机号为：$username"                       >>${pwd}/.user/${username}.txt
+                                # echo -e "身份证号为：$ID"                           >>${pwd}/.user/${username}.txt
+                                # echo -e "密码为：$a"                               >>${pwd}/.user/${username}.txt
+                                # echo -e "账户余额(元)：${yu}"                       >>${pwd}/.user/${username}.txt
+                                # echo                                              >>${pwd}/.user/${username}.txt
+                                # echo "***************** 用户信息 *****************" >>${pwd}/.user/${username}.txt
                                 read -p "#按回车返回#"
                                 break
                             else
@@ -446,7 +486,7 @@ do
     elif [ $n -eq 4 ]
     then
         read -p "请输入您的手机号：" username
-        test -e ${pwd}/user/${username}.txt
+        test -e ${pwd}/.user/${username}.txt
         if [ $? -eq 0 ]
         then
 
@@ -454,11 +494,11 @@ do
             read -p "请输入您的身份证号：" ID
             if [ $ID -gt 0 ] && [ ${#ID} -eq 18 ]
             then
-                grep $ID <${pwd}/user/${username}.txt >>/dev/null
+                grep $ID <${pwd}/.user/${username}.txt >>/dev/null
                 if [ $? -eq 0 ]
                 then
 		            clear
-                    cat ${pwd}/user/${username}.txt
+                    cat ${pwd}/.user/${username}.txt
                     echo 
                     read -p "#按回车键返回#"
                 else
