@@ -265,9 +265,9 @@ do
                     echo -e "本次您一共消费 $money 元"
                     echo -e "满足新店大促销条件，实际付款 $(($money-10)) 元"
                     money=$(($money-10))
-                    echo -e "满足新店大促销条件，实际付款 $(($money-10)) 元">>$1/.user/$2/购物记录.txt
+                    echo -e "满足新店大促销条件，实际付款 $money 元">>$1/.user/$2/购物记录.txt
                     echo "***************** 购物记录 *****************">>$1/.user/$2/购物记录.txt
-                    echo -e "本次商店收到付款 $(($money-10)) 元">>$1/.shop/商店盈利记录.txt
+                    echo -e "本次商店收到付款 $money 元">>$1/.shop/商店盈利记录.txt
                     echo -e "本店活动多多，期待您的下次光临"
                 else
                     echo -e "本次您一共消费 $money 元"
