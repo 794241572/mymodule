@@ -218,8 +218,8 @@ do
     #用户充值界面
     elif [ $n -eq 4 ]
     then
-        read -p "请输入金额(元):"  chong
-        if [ $chong -gt 0 ] && [ ${#chong} -lt 6 ]
+        read -p "请输入金额(一次性充值上限999元):"  chong
+        if [ $chong -gt 0 ] && [ $chong -lt 1000 ]
         then
             echo -e "充值成功"
             yu=`awk -F "：" 'NR==6{print $2}' $1/.user/$2/$2.txt `
@@ -228,7 +228,7 @@ do
             echo -e "您的余额为: ${now} 元"
             read -p "#按回车键返回#"
         else
-            echo -e "请正确输入序号"
+            echo -e "输入错误，请按照要求充值金额！！！"
             read -p "#按回车键返回#"
         fi
 
