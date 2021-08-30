@@ -356,8 +356,23 @@ do
             if [ $password == $key ]
             then
 		        clear
+                echo -e "\t\t正在登陆，请稍候。"
+                sleep 0.5s
+                clear
+                echo -e "\t\t正在登陆，请稍候。。"
+                sleep 0.5s
+                clear
                 echo -e "\t\t正在登陆，请稍候。。。"
-                sleep 2s
+                sleep 0.5s
+                clear
+                echo -e "\t\t正在登陆，请稍候。"
+                sleep 0.5s
+                clear
+                echo -e "\t\t正在登陆，请稍候。。"
+                sleep 0.5s
+                clear
+                echo -e "\t\t正在登陆，请稍候。。。"
+                sleep 0.5
 		        shop  ${pwd}  ${username}
             else
                 clear
